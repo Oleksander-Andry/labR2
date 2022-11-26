@@ -1,0 +1,156 @@
+using System;
+using System.Text;
+
+class Program
+{
+    public static void Main()
+    {
+        Console.OutputEncoding = Encoding.UTF8;
+
+        StudentsInfo students = new StudentsInfo();
+        do
+        {
+            bool wrongEntered = false;
+            Console.WriteLine("Введiть Прiзвище");
+            string name = Console.ReadLine();
+            Console.WriteLine("Введiть скільки пропустив студент(в годинах)");
+            string skippedS = Console.ReadLine();
+            if (!int.TryParse(skippedS, out int skippedTime))
+            {
+                wrongEntered = true;
+            }
+            Console.WriteLine("Введiть скільки виправдав студент пропусків(в годинах)");
+            string forgivenTimeS = Console.ReadLine();
+            if (!int.TryParse(forgivenTimeS, out int forgivenTime))
+            {
+                wrongEntered = true;
+            }
+            if (!wrongEntered)
+            {
+                Student student = new Student(name, skippedTime, forgivenTime);
+                students.AddDetail(student);
+            }
+            else
+            {
+                Console.WriteLine("Неправильно введенi данi");
+
+            }
+
+            Console.WriteLine("Будете вводити данi ще раз?(Yes або No)");
+            string answer = Console.ReadLine();
+            if (answer.ToLower() != "yes")
+            {
+                break;
+            }
+        }
+        while (true);
+        students.Print();
+
+        Console.ReadKey();
+    }
+}
+
+class Student
+{
+    public Student(string secondName, int skippedTime, int forgivenTime)
+    {
+        this.SecondName = secondName;
+        this.SkippedTime = skippedTime;
+        this.ForgivenTime = forgivenTime;
+    }
+
+    public string SecondName { get; private set; }
+    public int SkippedTime { get; private set; }
+    private int forgivenTime;
+    public int ForgivenTime
+    {
+        get
+        {
+            return forgivenTime;
+        }
+        private set
+        {
+            if (value <= SkippedTime)
+            {
+                forgivenTime = value;
+            }
+        }
+    }
+    public int ActualSkippedTime
+    {
+        get
+        {
+            return SkippedTime - forgivenTime;
+        }
+    }
+    public int ActualSkippedPercentage
+    {
+        get
+        {
+            return (int)MathF.Round((float)ActualSkippedTime * 100 / SkippedTime);
+        }
+    }
+}
+
+class StudentsInfo
+{
+    private Student[] students = new Student[0];
+
+    public StudentsInfo(Student[] students)
+    {
+        int studentsAmount = students.Length;
+        this.students = new Student[studentsAmount];
+        for (int i = 0; i < students.Length; i++)
+        {
+            this.students[i] = students[i];
+        }
+    }
+    public StudentsInfo()
+    {
+    }
+
+    public void AddDetail(Student detail)
+    {
+        Student[] studentsTmp = this.students;
+        this.students = new Student[studentsTmp.Length + 1];
+
+        if (studentsTmp.Length != 0)
+        {
+            for (int i = 0; i < studentsTmp.Length; i++)
+            {
+                this.students[i] = studentsTmp[i];
+            }
+        }
+        this.students[students.Length - 1] = detail;
+    }
+
+    public Student GetDetail(int number)
+    {
+        return this.students[number];
+    }
+
+    public void Print()
+    {
+        Console.WriteLine("|№ з/п| Прiзвище{0, 10}|         Пропущено, год. {0, 6}|      Пропуск{0, 8}|", "");
+        Console.WriteLine("|     |         {0, 10}|усього    {0,5}|{0, 5}виправдано|у годинах |{0, 7}у %|", "");
+
+        for (int i = 0; i < students.Length; i++)
+        {
+            Console.WriteLine("|{0, 5}| {1, 18}|  {2, 13}| {3, 14}| {4, 9}|{5, 10}|",
+                i + 1, students[i].SecondName, students[i].SkippedTime, students[i].ForgivenTime, students[i].ActualSkippedTime, students[i].ActualSkippedPercentage);
+        }
+
+        int skippedTimeSize = 0;
+        int forgivenTimeSize = 0;
+        int actualTimeSize = 0;
+        for (int i = 0; i < this.students.Length; i++)
+        {
+            skippedTimeSize += this.students[i].SkippedTime;
+            forgivenTimeSize += this.students[i].ForgivenTime;
+            actualTimeSize += this.students[i].ActualSkippedTime;
+        }
+
+        Console.WriteLine("|{0, 5}| {1, 18}|  {2, 13}| {3, 14}| {4, 9}|{5, 10}|",
+            "-", "Разом", skippedTimeSize, forgivenTimeSize, actualTimeSize, "-");
+    }
+}
